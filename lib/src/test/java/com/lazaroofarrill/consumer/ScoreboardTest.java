@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import com.lazaroofarrill.InMemoryScoreboard;
 import com.lazaroofarrill.Scoreboard;
 import com.lazaroofarrill.Team;
+import com.lazaroofarrill.TeamMatch;
 
 class ScoreboardTest {
 
@@ -25,11 +26,26 @@ class ScoreboardTest {
   void teamNameMayNotBeBlank() {
     assertThrows(IllegalArgumentException.class, () -> new Team("", 0));
     assertThrows(IllegalArgumentException.class, () -> new Team("   ", 0));
+    assertThrows(IllegalArgumentException.class, () -> new Team(null, 0));
   }
 
   @Test
   void teamPointsMayNotBeNegative() {
     assertThrows(IllegalArgumentException.class, () -> new Team("Home", -1));
+  }
+
+  // TeamMatch
+  @Test
+  void parametersCannotBeNull() {
+    var home = new Team("home", 0);
+    var away = new Team("away", 0);
+    var startedAt = Instant.now();
+    var matchId = UUID.randomUUID();
+
+    assertThrows(IllegalArgumentException.class, () -> new TeamMatch(null, away, startedAt, matchId));
+    assertThrows(IllegalArgumentException.class, () -> new TeamMatch(home, null, startedAt, matchId));
+    assertThrows(IllegalArgumentException.class, () -> new TeamMatch(home, away, null, matchId));
+    assertThrows(IllegalArgumentException.class, () -> new TeamMatch(home, away, startedAt, null));
   }
 
   // startMatch
@@ -135,7 +151,6 @@ class ScoreboardTest {
     assertEquals(matchesAfter.size(), 0);
   }
 
-
   @Test
   void matchCantbeUpdatedAfterFinishing() {
     Scoreboard scoreBoard = new InMemoryScoreboard();
@@ -147,7 +162,7 @@ class ScoreboardTest {
     scoreBoard.finishMatch(mexicoVSCanada);
 
     assertThrows(IllegalArgumentException.class,
-    () -> scoreBoard.updateScores(mexicoVSCanada, 1, 1));
+        () -> scoreBoard.updateScores(mexicoVSCanada, 1, 1));
   }
 
   @Test
@@ -156,14 +171,31 @@ class ScoreboardTest {
     assertThrows(IllegalArgumentException.class,
         () -> scoreBoard.finishMatch(UUID.randomUUID()));
   }
-}
 
-class MutableClock extends Clock {
+  static class MutableClock extends Clock {
     private Instant instant;
-    MutableClock(Instant start) { this.instant = start; }
-    void advance(Duration d) { this.instant = instant.plus(d); }
 
-    @Override public Instant instant() { return instant; }
-    @Override public ZoneId getZone() { return ZoneOffset.UTC; }
-    @Override public Clock withZone(ZoneId zone) { return this; }
+    MutableClock(Instant start) {
+      this.instant = start;
+    }
+
+    void advance(Duration d) {
+      this.instant = instant.plus(d);
+    }
+
+    @Override
+    public Instant instant() {
+      return instant;
+    }
+
+    @Override
+    public ZoneId getZone() {
+      return ZoneOffset.UTC;
+    }
+
+    @Override
+    public Clock withZone(ZoneId zone) {
+      return this;
+    }
+  }
 }
