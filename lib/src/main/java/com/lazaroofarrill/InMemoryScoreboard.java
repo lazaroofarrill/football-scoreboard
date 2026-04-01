@@ -14,18 +14,18 @@ import java.util.UUID;
 public class InMemoryScoreboard implements Scoreboard {
   private final Clock clock;
 
+  private final TreeSet<TeamMatch> matches = new TreeSet<>(
+      Comparator
+          .comparingInt((TeamMatch t) -> t.home().points() + t.away().points()).reversed()
+          .thenComparing(Comparator.comparing(TeamMatch::startedAt).reversed())
+          .thenComparing(TeamMatch::matchId)); // Final segregator
+
   public  InMemoryScoreboard() {
     this.clock = Clock.systemUTC();
   }
   public  InMemoryScoreboard(Clock clock) {
     this.clock = clock;
   }
-
-  private TreeSet<TeamMatch> matches = new TreeSet<>(
-      Comparator
-          .comparingInt((TeamMatch t) -> t.home().points() + t.away().points()).reversed()
-          .thenComparing(Comparator.comparing(TeamMatch::startedAt).reversed())
-          .thenComparing(TeamMatch::matchId)); // Final segregator
 
   public UUID startMatch(String home, String away) {
     var uuid = UUID.randomUUID();
