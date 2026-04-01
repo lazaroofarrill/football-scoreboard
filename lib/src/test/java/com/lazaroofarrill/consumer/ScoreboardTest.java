@@ -1,12 +1,15 @@
 package com.lazaroofarrill.consumer;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -87,22 +90,24 @@ class ScoreboardTest {
   // Summary
   @Test
   void matchesAreStoredSortedByPointSumDescAndThenStartTimeDesc() throws InterruptedException {
-    Scoreboard scoreBoard = new InMemoryScoreboard();
+    var clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
+    Scoreboard scoreBoard = new InMemoryScoreboard(clock);
+
     var mexicoVSCanada = scoreBoard.startMatch("Mexico", "Canada");
     scoreBoard.updateScores(mexicoVSCanada, 0, 5);
-    Thread.sleep(1); // Prevent non deterministic inputs on the same millisecond on fast hardware
+    clock.advance(Duration.ofMillis(1));
 
     var spainVSBrazil = scoreBoard.startMatch("Spain", "Brazil");
     scoreBoard.updateScores(spainVSBrazil, 10, 2);
-    Thread.sleep(1);
+    clock.advance(Duration.ofMillis(1));
 
     var germanyVsFrance = scoreBoard.startMatch("Germany", "France");
     scoreBoard.updateScores(germanyVsFrance, 2, 2);
-    Thread.sleep(1);
+    clock.advance(Duration.ofMillis(1));
 
     var uruguayVsItaly = scoreBoard.startMatch("Uruguay", "Italy");
     scoreBoard.updateScores(uruguayVsItaly, 6, 6);
-    Thread.sleep(1);
+    clock.advance(Duration.ofMillis(1));
 
     var argentinaVsAustralia = scoreBoard.startMatch("Argentina", "Australia");
     scoreBoard.updateScores(argentinaVsAustralia, 3, 1);
@@ -136,4 +141,14 @@ class ScoreboardTest {
     assertThrows(IllegalArgumentException.class,
         () -> scoreBoard.finishMatch(UUID.randomUUID()));
   }
+}
+
+class MutableClock extends Clock {
+    private Instant instant;
+    MutableClock(Instant start) { this.instant = start; }
+    void advance(Duration d) { this.instant = instant.plus(d); }
+
+    @Override public Instant instant() { return instant; }
+    @Override public ZoneId getZone() { return ZoneOffset.UTC; }
+    @Override public Clock withZone(ZoneId zone) { return this; }
 }

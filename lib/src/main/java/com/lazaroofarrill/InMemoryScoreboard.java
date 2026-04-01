@@ -3,6 +3,7 @@
  */
 package com.lazaroofarrill;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -11,6 +12,15 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 public class InMemoryScoreboard implements Scoreboard {
+  private final Clock clock;
+
+  public  InMemoryScoreboard() {
+    this.clock = Clock.systemUTC();
+  }
+  public  InMemoryScoreboard(Clock clock) {
+    this.clock = clock;
+  }
+
   private TreeSet<TeamMatch> matches = new TreeSet<>(
       Comparator
           .comparingInt((TeamMatch t) -> t.home().points() + t.away().points()).reversed()
@@ -22,7 +32,7 @@ public class InMemoryScoreboard implements Scoreboard {
     var match = new TeamMatch(
         new Team(home, 0),
         new Team(away, 0),
-        Instant.now(),
+        Instant.now(clock),
         uuid);
     matches.add(match);
     return uuid;
