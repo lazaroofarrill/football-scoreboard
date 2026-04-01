@@ -17,12 +17,12 @@ public class InMemoryScoreboard implements Scoreboard {
           .thenComparing(Comparator.comparing(TeamMatch::startedAt).reversed())
           .thenComparing(TeamMatch::matchId)); // Final segregator
 
-  public UUID startMatch(String home, String away, Instant time) {
+  public UUID startMatch(String home, String away) {
     var uuid = UUID.randomUUID();
     var match = new TeamMatch(
         new Team(home, 0),
         new Team(away, 0),
-        time,
+        Instant.now(),
         uuid);
     matches.add(match);
     return uuid;

@@ -3,9 +3,9 @@ package com.lazaroofarrill;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -30,14 +30,13 @@ class ScoreboardTest {
     Scoreboard scoreBoard = new InMemoryScoreboard();
     var home = "Home";
     var away = "Away";
-    var startTime = Instant.now();
-    scoreBoard.startMatch(home, away, startTime);
+    scoreBoard.startMatch(home, away);
     var matches = scoreBoard.getSummary();
 
     assertEquals(matches.size(), 1);
     assertEquals(matches.getFirst().home().name(), home);
     assertEquals(matches.getFirst().away().name(), away);
-    assertEquals(matches.getFirst().startedAt(), startTime);
+    assertTrue(matches.getFirst().startedAt().isBefore(Instant.now()));
     assertEquals(matches.getFirst().home().points(), 0);
     assertEquals(matches.getFirst().away().points(), 0);
   }
@@ -45,8 +44,8 @@ class ScoreboardTest {
   @Test
   void startMatchReturnsUniqueIds() {
     Scoreboard scoreBoard = new InMemoryScoreboard();
-    var id1 = scoreBoard.startMatch("Home", "Away", Instant.now());
-    var id2 = scoreBoard.startMatch("Home2", "Away2", Instant.now());
+    var id1 = scoreBoard.startMatch("Home", "Away");
+    var id2 = scoreBoard.startMatch("Home2", "Away2");
     assertNotEquals(id1, id2);
   }
 
@@ -54,7 +53,7 @@ class ScoreboardTest {
   @Test
   void aMatchScoreCanBeUpdated() {
     Scoreboard scoreBoard = new InMemoryScoreboard();
-    var matchId = scoreBoard.startMatch("home", "away", Instant.now());
+    var matchId = scoreBoard.startMatch("home", "away");
     scoreBoard.updateScores(matchId, 5, 4);
 
     var matches = scoreBoard.getSummary();
@@ -73,7 +72,7 @@ class ScoreboardTest {
   @Test
   void updateScoresWithNegativePointsThrows() {
     Scoreboard scoreBoard = new InMemoryScoreboard();
-    var matchId = scoreBoard.startMatch("Home", "Away", Instant.now());
+    var matchId = scoreBoard.startMatch("Home", "Away");
     assertThrows(IllegalArgumentException.class,
         () -> scoreBoard.updateScores(matchId, -1, 0));
     assertThrows(IllegalArgumentException.class,
@@ -82,18 +81,25 @@ class ScoreboardTest {
 
   // Summary
   @Test
-  void matchesAreStoredSortedByPointSumDescAndThenStartTimeDesc() {
+  void matchesAreStoredSortedByPointSumDescAndThenStartTimeDesc() throws InterruptedException {
     Scoreboard scoreBoard = new InMemoryScoreboard();
-    var leagueStart = Instant.now();
-    var mexicoVSCanada = scoreBoard.startMatch("Mexico", "Canada", leagueStart);
+    var mexicoVSCanada = scoreBoard.startMatch("Mexico", "Canada");
     scoreBoard.updateScores(mexicoVSCanada, 0, 5);
-    var spainVSBrazil = scoreBoard.startMatch("Spain", "Brazil", leagueStart.plus(1, ChronoUnit.MINUTES));
+    Thread.sleep(1); // Prevent non deterministic inputs on the same millisecond on fast hardware
+
+    var spainVSBrazil = scoreBoard.startMatch("Spain", "Brazil");
     scoreBoard.updateScores(spainVSBrazil, 10, 2);
-    var germanyVsFrance = scoreBoard.startMatch("Germany", "France", leagueStart.plus(2, ChronoUnit.MINUTES));
+    Thread.sleep(1);
+
+    var germanyVsFrance = scoreBoard.startMatch("Germany", "France");
     scoreBoard.updateScores(germanyVsFrance, 2, 2);
-    var uruguayVsItaly = scoreBoard.startMatch("Uruguay", "Italy", leagueStart.plus(3, ChronoUnit.MINUTES));
+    Thread.sleep(1);
+
+    var uruguayVsItaly = scoreBoard.startMatch("Uruguay", "Italy");
     scoreBoard.updateScores(uruguayVsItaly, 6, 6);
-    var argentinaVsAustralia = scoreBoard.startMatch("Argentina", "Australia", leagueStart.plus(4, ChronoUnit.MINUTES));
+    Thread.sleep(1);
+
+    var argentinaVsAustralia = scoreBoard.startMatch("Argentina", "Australia");
     scoreBoard.updateScores(argentinaVsAustralia, 3, 1);
 
     var matches = scoreBoard.getSummary();
@@ -109,8 +115,7 @@ class ScoreboardTest {
   @Test
   void matchIsRemovedAfterFinishing() {
     Scoreboard scoreBoard = new InMemoryScoreboard();
-    var leagueStart = Instant.now();
-    var mexicoVSCanada = scoreBoard.startMatch("Mexico", "Canada", leagueStart);
+    var mexicoVSCanada = scoreBoard.startMatch("Mexico", "Canada");
 
     var matchesBefore = scoreBoard.getSummary();
     assertEquals(matchesBefore.size(), 1);

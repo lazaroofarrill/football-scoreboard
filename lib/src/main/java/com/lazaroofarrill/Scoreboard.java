@@ -1,11 +1,10 @@
 package com.lazaroofarrill;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public interface Scoreboard {
-  UUID startMatch(String home, String away, Instant time);
+  UUID startMatch(String home, String away);
 
   List<TeamMatch> getSummary();
 
