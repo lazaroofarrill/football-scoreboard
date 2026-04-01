@@ -11,7 +11,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 public class InMemoryScoreboard implements Scoreboard {
-  TreeSet<TeamMatch> matches = new TreeSet<>(
+  private TreeSet<TeamMatch> matches = new TreeSet<>(
       Comparator
           .comparingInt((TeamMatch t) -> t.home().points() + t.away().points()).reversed()
           .thenComparing(Comparator.comparing(TeamMatch::startedAt).reversed())
@@ -66,7 +66,7 @@ record Team(String name, int points) {
     this.points = points;
   }
 
-  public Team withPoints(int newPoints)  {
+  public Team withPoints(int newPoints) {
     if (newPoints < 0) {
       throw new IllegalArgumentException("Points cannot be negative");
     }
