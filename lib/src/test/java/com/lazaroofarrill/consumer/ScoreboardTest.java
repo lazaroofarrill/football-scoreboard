@@ -135,6 +135,21 @@ class ScoreboardTest {
     assertEquals(matchesAfter.size(), 0);
   }
 
+
+  @Test
+  void matchCantbeUpdatedAfterFinishing() {
+    Scoreboard scoreBoard = new InMemoryScoreboard();
+    var mexicoVSCanada = scoreBoard.startMatch("Mexico", "Canada");
+
+    var matchesBefore = scoreBoard.getSummary();
+    assertEquals(matchesBefore.size(), 1);
+
+    scoreBoard.finishMatch(mexicoVSCanada);
+
+    assertThrows(IllegalArgumentException.class,
+    () -> scoreBoard.updateScores(mexicoVSCanada, 1, 1));
+  }
+
   @Test
   void finishMatchThrowsWhenMatchNotFound() {
     Scoreboard scoreBoard = new InMemoryScoreboard();
