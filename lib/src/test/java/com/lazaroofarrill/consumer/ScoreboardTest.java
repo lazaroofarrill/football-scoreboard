@@ -1,4 +1,5 @@
-package com.lazaroofarrill;
+package com.lazaroofarrill.consumer;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -9,6 +10,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+
+import com.lazaroofarrill.InMemoryScoreboard;
+import com.lazaroofarrill.Scoreboard;
+import com.lazaroofarrill.Team;
 
 class ScoreboardTest {
 
