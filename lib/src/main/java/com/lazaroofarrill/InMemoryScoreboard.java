@@ -27,6 +27,7 @@ public class InMemoryScoreboard implements Scoreboard {
     this.clock = clock;
   }
 
+  @Override
   public UUID startMatch(String home, String away) {
     var uuid = UUID.randomUUID();
     var match = new TeamMatch(
@@ -39,6 +40,7 @@ public class InMemoryScoreboard implements Scoreboard {
     return uuid;
   }
 
+  @Override
   public void updateScores(UUID matchId, int homeScore, int awayScore) {
     var target = findTeamMatch(matchId);
 
