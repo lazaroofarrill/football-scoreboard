@@ -50,7 +50,7 @@ class ScoreboardTest {
 
   // startMatch
   @Test
-  void matchesAreStartedCorrectly() {
+  void matchesAreStartedCorrectly() throws InterruptedException {
     Scoreboard scoreBoard = new InMemoryScoreboard();
     var home = "Home";
     var away = "Away";
@@ -60,6 +60,9 @@ class ScoreboardTest {
     assertEquals(matches.size(), 1);
     assertEquals(matches.getFirst().home().name(), home);
     assertEquals(matches.getFirst().away().name(), away);
+    if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+      Thread.sleep(20);
+    }
     assertTrue(matches.getFirst().startedAt().isBefore(Instant.now()));
     assertEquals(matches.getFirst().home().points(), 0);
     assertEquals(matches.getFirst().away().points(), 0);
