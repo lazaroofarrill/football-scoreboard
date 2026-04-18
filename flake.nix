@@ -11,7 +11,12 @@
       let pkgs = nixpkgs.legacyPackages.${system};
       in {
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [ jdk21 gradle jdt-language-server ];
+          buildInputs = with pkgs; [
+            jdk21
+            gradle
+            jdt-language-server
+            kotlin-language-server
+          ];
 
           shellHook = ''
             echo "Java $(java -version 2>&1 | head -1)"

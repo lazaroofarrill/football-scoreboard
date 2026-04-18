@@ -45,12 +45,17 @@ public class InMemoryScoreboard implements Scoreboard {
     var target = findTeamMatch(matchId);
 
     sortedMatches.remove(target);
-    var newMatch = new TeamMatch(
-        target.home().withPoints(homeScore),
-        target.away().withPoints(awayScore),
-        target.startedAt(), target.matchId());
-    sortedMatches.add(newMatch);
-    indexedMatches.put(newMatch.matchId(), newMatch);
+    try {
+      var newMatch = new TeamMatch(
+          target.home().withPoints(homeScore),
+          target.away().withPoints(awayScore),
+          target.startedAt(), target.matchId());
+      sortedMatches.add(newMatch);
+      indexedMatches.put(newMatch.matchId(), newMatch);
+    } catch (IllegalArgumentException e) {
+      sortedMatches.add(target);
+      throw e;
+    }
   }
 
   @Override

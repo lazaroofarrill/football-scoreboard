@@ -106,6 +106,27 @@ class ScoreboardTest {
         () -> scoreBoard.updateScores(matchId, 0, -1));
   }
 
+  @Test
+  void updateScoresWithNegativePointsConservesGames() {
+    Scoreboard scoreBoard = new InMemoryScoreboard();
+    var matchId = scoreBoard.startMatch("Home", "Away");
+
+    scoreBoard.updateScores(matchId, 2, 3);
+
+    var summary = scoreBoard.getSummary();
+
+    assertEquals(summary.size(), 1);
+
+    assertThrows(IllegalArgumentException.class,
+        () -> scoreBoard.updateScores(matchId, -1, 0));
+
+    var summaryAfterInvalidScore = scoreBoard.getSummary();
+    assertEquals(summaryAfterInvalidScore.size(), 1);
+
+    assertEquals(summaryAfterInvalidScore.get(0).home().points(), 2);
+    assertEquals(summaryAfterInvalidScore.get(0).away().points(), 3);
+  }
+
   // Summary
   @Test
   void matchesAreStoredSortedByPointSumDescAndThenStartTimeDesc() throws InterruptedException {
